@@ -1,0 +1,25 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env
+
+# --- Excel (File temporanei e di lock) ---
+# Ignora i file temporanei che Excel crea (es. ~$Cartel1.xlsx)
+~$*.xlsx
+~$*.xls
+
+secret.json
+
+prova2.xlsx
+
+# --- Sistema Operativo ---
+.DS_Store
+Thumbs.db
+
+# --- GitHub Actions ---
+# Di solito non si ignora nulla qui, ma se lo script genera log:
+*.log
