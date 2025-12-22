@@ -3,9 +3,8 @@ from openpyxl.utils import get_column_letter
 from copy import copy
 import datetime
 from datetime import date, timedelta,datetime
-from points_LOCAL import esporta_dati
-import json
-import requests
+from points import esporta_dati
+
 import asyncio
 
 
@@ -151,7 +150,8 @@ def modifica_excel(nome_file_input, nome_file_output,members):
                             ws1.cell(row=old_points[i]["index"],column=last_col-1).value=0+(members[i]["points"]-ach)
                         elif( datetime.strptime((ws1.cell(row=old_points[i]["index"],column=2).value), "%d/%m/%Y").date()<= lastCG_end):
                             ws1.cell(row=old_points[i]["index"],column=last_col-1).value+=(members[i]["points"]-ach)
-                    
+    
+    print(f"Aggiornati punti per {len(members)} membri nella colonna {last_col}")                
                 
 
 

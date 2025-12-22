@@ -4,11 +4,10 @@ import json
 import coc
 
 # --- CONFIGURAZIONE ---
-# Inserisci qui i dati o caricali da file
-COC_EMAIL = "ilredeitrattori@gmail.com"
-COC_PASSWORD = "3499Pg00"
-# Il Tag del clan può essere letto dal file o impostato qui
-CLAN_TAG = "2JPPL0922" 
+
+COC_EMAIL = os.getenv("COC_EMAIL")
+COC_PASSWORD = os.getenv("COC_PASSWORD")
+CLAN_TAG = os.getenv("CLAN_TAG")
 
 async def recupera_punti_player(client, member_tag):
     """
