@@ -114,10 +114,13 @@ def modifica_excel(nome_file_input, nome_file_output,members):
                 test_data=ws1.cell(row=old_points[i]["index"],column=2).value
                 ach=ws1.cell(row=old_points[i]["index"],column=5).value
                 
+                
                 if point_var is None and datetime.strptime((test_data), "%d/%m/%Y").date()<= lastCG_end :
                     ws1.cell(row=old_points[i]["index"],column=last_col-1).value=0
+                    ws1.cell(row=old_points[i]["index"],column=5).value=members[i]["points"]
                 elif(point_var is not None):
                     ws1.cell(row=old_points[i]["index"],column=last_col-1).value+=(members[i]["points"]-ach)
+                    ws1.cell(row=old_points[i]["index"],column=5).value=members[i]["points"]
                     
     else:
         if today>nextCG_end:
@@ -129,6 +132,7 @@ def modifica_excel(nome_file_input, nome_file_output,members):
                     ach=ws1.cell(row=old_points[i]["index"],column=5).value
                     if(point_var is None and datetime.strptime((ws1.cell(row=old_points[i]["index"],column=2).value), "%d/%m/%Y").date()<= nextCG_end ):
                         ws1.cell(row=old_points[i]["index"],column=last_col).value=0+(members[i]["points"]-ach)
+                        ws1.cell(row=old_points[i]["index"],column=5).value=members[i]["points"]
         else:
             if today.day>=22 and today.day<29:
                 for i in range(0,ws1.max_row-1):
@@ -139,6 +143,7 @@ def modifica_excel(nome_file_input, nome_file_output,members):
                         ach=ws1.cell(row=old_points[i]["index"],column=5).value
                         if(point_var is None and datetime.strptime((ws1.cell(row=old_points[i]["index"],column=2).value), "%d/%m/%Y").date()<= nextCG_end ):
                             ws1.cell(row=old_points[i]["index"],column=last_col).value=0+(members[i]["points"]-ach)
+                            ws1.cell(row=old_points[i]["index"],column=5).value=members[i]["points"]
             else:
                 for i in range(0,ws1.max_row-1):
                     if(old_points[i]["name"]!=members[i]["name"]):
@@ -148,8 +153,10 @@ def modifica_excel(nome_file_input, nome_file_output,members):
                         ach=ws1.cell(row=old_points[i]["index"],column=5).value
                         if(point_var is None and datetime.strptime((ws1.cell(row=old_points[i]["index"],column=2).value), "%d/%m/%Y").date()<= lastCG_end ):
                             ws1.cell(row=old_points[i]["index"],column=last_col-1).value=0+(members[i]["points"]-ach)
+                            ws1.cell(row=old_points[i]["index"],column=5).value=members[i]["points"]
                         elif( datetime.strptime((ws1.cell(row=old_points[i]["index"],column=2).value), "%d/%m/%Y").date()<= lastCG_end):
                             ws1.cell(row=old_points[i]["index"],column=last_col-1).value+=(members[i]["points"]-ach)
+                            ws1.cell(row=old_points[i]["index"],column=5).value=members[i]["points"]
     
     print(f"Aggiornati punti per {len(members)} membri nella colonna {last_col}")                
                 
