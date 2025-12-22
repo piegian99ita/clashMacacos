@@ -12,6 +12,7 @@ env/
 ~$*.xlsx
 ~$*.xls
 
+*LOCAL.py
 secret.json
 
 prova2.xlsx

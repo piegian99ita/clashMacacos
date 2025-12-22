@@ -3,9 +3,10 @@ from openpyxl.utils import get_column_letter
 from copy import copy
 import datetime
 from datetime import date, timedelta,datetime
-from points import esporta_dati
+from points_LOCAL import esporta_dati
 import json
 import requests
+import asyncio
 
 
 def copia_stile(cella_origine, cella_destinazione):
@@ -73,7 +74,7 @@ def modifica_excel(nome_file_input, nome_file_output,members):
     lett=get_column_letter(y) 
     old_points=[]
     for row in range(2,ws1.max_row+1):
-        ws1.cell(row=row, column=3).value = f"=AVERAGE(F{row}:{lett}{row})"
+        ws1.cell(row=row, column=3).value = f"=ROUND(AVERAGE(F{row}:{lett}{row}), 0)"
         ws1.cell(row=row, column=4).value = f"=SUM(F{row}:{lett}{row})" 
         if(ws1.cell(row=row,column=5).value is None):
             name_to_search=ws1.cell(row=row,column=1).value
@@ -120,13 +121,37 @@ def modifica_excel(nome_file_input, nome_file_output,members):
                     ws1.cell(row=old_points[i]["index"],column=last_col-1).value+=(members[i]["points"]-ach)
                     
     else:
-        for i in range(0,ws1.max_row):
-            if(old_points[i]["name"]!=members[i]["name"]):
-                print("ERRORE NELL'ASSEGNAZIONE DEI PUNTI!")
+        if today>nextCG_end:
+            for i in range(0,ws1.max_row-1):
+                if(old_points[i]["name"]!=members[i]["name"]):
+                    print("ERRORE NELL'ASSEGNAZIONE DEI PUNTI!")    
+                else:
+                    point_var=ws1.cell(row=old_points[i]["index"],column=last_col).value
+                    ach=ws1.cell(row=old_points[i]["index"],column=5).value
+                    if(point_var is None and datetime.strptime((ws1.cell(row=old_points[i]["index"],column=2).value), "%d/%m/%Y").date()<= nextCG_end ):
+                        ws1.cell(row=old_points[i]["index"],column=last_col).value=0+(members[i]["points"]-ach)
+        else:
+            if today.day>=22 and today.day<29:
+                for i in range(0,ws1.max_row-1):
+                    if(old_points[i]["name"]!=members[i]["name"]):
+                        print("ERRORE NELL'ASSEGNAZIONE DEI PUNTI!")    
+                    else:
+                        point_var=ws1.cell(row=old_points[i]["index"],column=last_col).value
+                        ach=ws1.cell(row=old_points[i]["index"],column=5).value
+                        if(point_var is None and datetime.strptime((ws1.cell(row=old_points[i]["index"],column=2).value), "%d/%m/%Y").date()<= nextCG_end ):
+                            ws1.cell(row=old_points[i]["index"],column=last_col).value=0+(members[i]["points"]-ach)
             else:
-                point_var=ws1.cell(row=old_points[i]["index"],column=last_col).value
-                if(point_var is None and datetime.strptime((ws1.cell(row=old_points[i]["index"],column=2).value), "%d/%m/%Y").date()<= nextCG_end ):
-                    ws1.cell(row=old_points[i]["index"],column=last_col-1).value=0+(members[i]["points"]-ach)
+                for i in range(0,ws1.max_row-1):
+                    if(old_points[i]["name"]!=members[i]["name"]):
+                        print("ERRORE NELL'ASSEGNAZIONE DEI PUNTI!")    
+                    else:
+                        point_var=ws1.cell(row=old_points[i]["index"],column=last_col-1).value
+                        ach=ws1.cell(row=old_points[i]["index"],column=5).value
+                        if(point_var is None and datetime.strptime((ws1.cell(row=old_points[i]["index"],column=2).value), "%d/%m/%Y").date()<= lastCG_end ):
+                            ws1.cell(row=old_points[i]["index"],column=last_col-1).value=0+(members[i]["points"]-ach)
+                        elif( datetime.strptime((ws1.cell(row=old_points[i]["index"],column=2).value), "%d/%m/%Y").date()<= lastCG_end):
+                            ws1.cell(row=old_points[i]["index"],column=last_col-1).value+=(members[i]["points"]-ach)
+                    
                 
 
 
@@ -140,10 +165,20 @@ def modifica_excel(nome_file_input, nome_file_output,members):
     print("Fatto!")
 
 
+async def main():
+    # 1. Recupera i dati (DEVI USARE await)
+    print("Inizio recupero dati dai server Supercell...")
+    players = await esporta_dati()  # Qui serviva l'await!
+    
+    # 2. Passa i dati alla funzione Excel
+    # Se modifica_excel non è async, la chiami normalmente
+    if players:
+        modifica_excel('prova.xlsx', 'prova.xlsx', players)
+        print("Processo completato!")
+    else:
+        print("Nessun dato recuperato.")
 
+if __name__ == "__main__":
+    # Avvia tutto il ciclo
+    asyncio.run(main())
 
-
-players=esporta_dati()
-
-modifica_excel('prova.xlsx', 'prova.xlsx',players)
-#print(lista_membri2)
