@@ -16,6 +16,7 @@ env/
 secret.json
 
 prova2.xlsx
+rewards_temp.xlsx
 
 # --- Sistema Operativo ---
 .DS_Store

@@ -6,6 +6,10 @@ on:
     - cron: '*/10 * 21-29 * *'
   workflow_dispatch: # Ti permette di avviarlo manualmente per testare se funziona
 
+concurrency:
+  group: gestione-excel-condiviso
+  cancel-in-progress: false
+
 jobs:
   run-script:
     runs-on: ubuntu-latest

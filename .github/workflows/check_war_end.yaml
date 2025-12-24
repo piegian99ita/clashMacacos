@@ -3,12 +3,11 @@ name: Esegui Clan Capital Update
 on:
   schedule:
     # 06:00 UTC = 07:00 Italiane (Ora solare)
-    - cron: '30 6 * * 1'
+    - cron: '13 4 */2 * *'
   workflow_dispatch: # Ti permette di avviarlo manualmente per testare se funziona
 
-concurrency:
-  group: gestione-excel-condiviso
-  cancel-in-progress: false
+permissions:
+  contents: write  # <--- FONDAMENTALE: Permette di modificare il file YAML
 
 jobs:
   run-script:
@@ -26,7 +25,7 @@ jobs:
       - name: Installa dipendenze
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements2.txt
 
       - name: Esegui script Clan Capital
         # Se il file clan_games.py è in una sottocartella, aggiungi il percorso (es. scripts/clan_games.py)
@@ -35,13 +34,13 @@ jobs:
           COC_EMAIL: ${{ secrets.COC_EMAIL }}
           COC_PASSWORD: ${{ secrets.COC_PASSWORD }}
           CLAN_TAG: ${{ secrets.CLAN_TAG }}
-        run: python clan_capital.py
+        run: python check_war.py
 
-      - name: Salva modifiche Excel
+      - name: Salva modifiche yaml
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add *.xlsx
+          git add .github/workflows/*.yaml
           # Il comando commit non fallisce se non ci sono modifiche grazie a || echo
           git commit -m "Update Clan Capital data - $(date +'%Y-%m-%d')" || echo "Nessuna modifica da salvare"
           git push
