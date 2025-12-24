@@ -1,4 +1,4 @@
-name: Esegui Clan Capital Update
+name: Esegui YAML FILE WAR Update
 
 on:
   schedule:
@@ -42,5 +42,5 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add .github/workflows/*.yaml
           # Il comando commit non fallisce se non ci sono modifiche grazie a || echo
-          git commit -m "Update Clan Capital data - $(date +'%Y-%m-%d')" || echo "Nessuna modifica da salvare"
+          git commit -m "Update war yaml file data - $(date +'%Y-%m-%d')" || echo "Nessuna modifica da salvare"
           git push

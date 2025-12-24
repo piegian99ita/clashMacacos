@@ -1,4 +1,4 @@
-name: Esegui Clan Capital Update
+name: Esegui WAR Update
 
 on:
   schedule:
@@ -27,14 +27,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Esegui script Clan Capital
+      - name: Esegui script war
         # Se il file clan_games.py è in una sottocartella, aggiungi il percorso (es. scripts/clan_games.py)
         env:
           # Qui colleghi il Secret di GitHub alla variabile d'ambiente del sistema
           COC_EMAIL: ${{ secrets.COC_EMAIL }}
           COC_PASSWORD: ${{ secrets.COC_PASSWORD }}
           CLAN_TAG: ${{ secrets.CLAN_TAG }}
-        run: python clan_capital.py
+        run: python war.py
 
       - name: Salva modifiche Excel
         run: |-
@@ -42,5 +42,5 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add *.xlsx
           # Il comando commit non fallisce se non ci sono modifiche grazie a || echo
-          git commit -m "Update Clan Capital data - $(date +'%Y-%m-%d')" || echo "Nessuna modifica da salvare"
+          git commit -m "Update WAR data - $(date +'%Y-%m-%d')" || echo "Nessuna modifica da salvare"
           git push

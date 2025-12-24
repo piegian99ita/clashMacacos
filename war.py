@@ -116,7 +116,7 @@ async def aggiorna_membri(client,res,nome_file_input,nome_file_output):
             last_col = get_column_letter(index + 1)
 
             ws1.cell(row=idx, column=5).value = f"=SUM(G{idx}:{last_col}{idx})"
-            ws1.cell(row=idx, column=6).value = f"=AVERAGE(G{idx}:{last_col}{idx})"
+            ws1.cell(row=idx, column=6).value = f"=ROUND(AVERAGE(G{idx}:{last_col}{idx}),1)"
 
 
     wb.save(nome_file_output)
