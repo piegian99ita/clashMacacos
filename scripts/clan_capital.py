@@ -61,12 +61,17 @@ async def main():
             raid_log = await client.get_raid_log(CLAN_TAG)
             raid_attuale = next((r for r in raid_log if str(r.state).lower() == 'ongoing'), None)
 
+            start_dt = raid_attuale.start_time.time
+            end_dt=raid_attuale.end_time.time
             if raid_attuale:
                 data_inizio_str = raid_attuale.start_time.date().strftime("%d/%m/%Y")
                 colonna_target = None
                 for col in range(4, ws.max_column + 1):
-                    if ws.cell(row=1, column=col).value == data_inizio_str:
+                    if ws.cell(row=1, column=col).value.startswith("Colonna"):
                         colonna_target = col
+                        if date.today()>=start_dt.date()  and date.today()<=end_dt.date():
+                            ws.cell(row=1, column=col).value=data_inizio_str
+                        
                         break
                 
                 if not colonna_target:
@@ -84,6 +89,9 @@ async def main():
                 for row in range(2, ws.max_row + 1):
                     # Arrotondamento aggiunto come richiesto
                     ws.cell(row=row, column=3).value = f"=ROUND(AVERAGE(D{row}:{ultima_col_lettera}{row}), 0)"
+                    if ws.cell(row=row,column=colonna_target).value is None:
+                        ws.cell(row=row,column=colonna_target).value=0
+
 
             wb.save(FILE_EXCEL)
             print("Excel aggiornato con successo.")
