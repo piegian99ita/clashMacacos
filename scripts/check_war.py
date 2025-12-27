@@ -3,12 +3,12 @@ import os
 import coc
 
 from ruamel.yaml import YAML
-from datetime import datetime, timedelta
+from datetime import  timedelta
 
 # --- CONFIGURAZIONE ---
-COC_EMAIL = os.environ.get("COC_EMAIL", "ilredeitrattori@gmail.com")
-COC_PASSWORD = os.environ.get("COC_PASSWORD", "3499Pg00")
-CLAN_TAG = os.environ.get("CLAN_TAG", "2JPPL0922")
+COC_EMAIL = os.environ.get("COC_EMAIL")
+COC_PASSWORD = os.environ.get("COC_PASSWORD")
+CLAN_TAG = os.environ.get("CLAN_TAG")
 
 # !!! IMPORTANTE: Questo deve essere il nome ESATTO del file nel tuo repo !!!
 WORKFLOW_FILENAME = ".github/workflows/war_script.yaml" 

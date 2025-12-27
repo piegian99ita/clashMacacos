@@ -202,7 +202,7 @@ async def main():
     # 2. Passa i dati alla funzione Excel
     # Se modifica_excel non è async, la chiami normalmente
     if players:
-        modifica_excel('cc_cg_events.xlsx', 'cc_cg_events.xlsx', players)
+        modifica_excel('../cc_cg_events.xlsx', '../cc_cg_events.xlsx', players)
         print("Processo completato!")
     else:
         print("Nessun dato recuperato.")

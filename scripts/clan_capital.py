@@ -1,8 +1,7 @@
 import openpyxl
 from openpyxl.utils import get_column_letter
 from copy import copy
-from datetime import date, datetime
-import json
+from datetime import date
 import asyncio
 import os
 import coc
@@ -12,7 +11,7 @@ import coc
 COC_EMAIL = os.getenv("COC_EMAIL")
 COC_PASSWORD = os.getenv("COC_PASSWORD")
 CLAN_TAG = os.getenv("CLAN_TAG")
-FILE_EXCEL = "cc_cg_events.xlsx"
+FILE_EXCEL = "../cc_cg_events.xlsx"
 
 def copia_stile(cella_origine, cella_destinazione):
     if cella_origine.has_style:
