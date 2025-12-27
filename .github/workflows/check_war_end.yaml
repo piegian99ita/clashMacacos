@@ -7,7 +7,8 @@ on:
   workflow_dispatch: # Ti permette di avviarlo manualmente per testare se funziona
 
 permissions:
-  contents: write  # <--- FONDAMENTALE: Permette di modificare il file YAML
+  contents: write
+  actions: write
 
 jobs:
   run-script:
