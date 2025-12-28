@@ -27,3 +27,4 @@ TOK_CLASH.txt
 # --- GitHub Actions ---
 # Di solito non si ignora nulla qui, ma se lo script genera log:
 *.log
+app.py
