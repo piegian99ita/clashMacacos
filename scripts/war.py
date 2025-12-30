@@ -158,7 +158,7 @@ async def esporta_dati():
                         #print(f"{part.name}:number of attacks:{len(part.attacks)} atk1:{list_star[0]} atk2:{list_star[1]}")
                         results.append({"name":part.name, "war_skip":False,"atk_skip":0,"atk1":list_star[0],"atk2":list_star[1]})
 
-            await aggiorna_membri(client,results,"../rewards.xlsx","../rewards.xlsx")
+            await aggiorna_membri(client,results,"rewards.xlsx","rewards.xlsx")
            
 
                 
