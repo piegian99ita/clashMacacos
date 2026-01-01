@@ -104,7 +104,7 @@ async def aggiorna_membri(client,res,nome_file_input,nome_file_output):
             if member_data.get("war_skip"):
                 ws1.cell(row=idx, column=3).value = (ws1.cell(row=idx, column=3).value or 0) + 1
             ws1.cell(row=idx, column=2).value = (ws1.cell(row=idx, column=2).value or 0) + member_data.get("atk_skip", 0)
-            ws1.cell(row=idx, column=4).value =(ws1.cell(row=idx, column=2).value or 0) +1
+            ws1.cell(row=idx, column=4).value =(ws1.cell(row=idx, column=4).value or 0) +1
      
             ws1.cell(row=idx, column=index).value = member_data.get("atk1")
             ws1.cell(row=idx, column=index+1).value = member_data.get("atk2")
