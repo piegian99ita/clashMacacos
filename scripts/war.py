@@ -110,10 +110,10 @@ async def aggiorna_membri(client,res,nome_file_input,nome_file_output):
             ws1.cell(row=idx, column=index+1).value = member_data.get("atk2")
             
 
-            last_col = get_column_letter(index + 1)
+        last_col = get_column_letter(index + 1)
 
-            ws1.cell(row=idx, column=5).value = f"=SUM(G{idx}:{last_col}{idx})"
-            ws1.cell(row=idx, column=6).value = f"=ROUND(AVERAGE(G{idx}:{last_col}{idx}),1)"
+        ws1.cell(row=idx, column=5).value = f"=SUM(G{idx}:{last_col}{idx})"
+        ws1.cell(row=idx, column=6).value = f"=ROUND(AVERAGE(G{idx}:{last_col}{idx}),1)"
 
 
     wb.save(nome_file_output)
@@ -132,33 +132,34 @@ async def esporta_dati():
             # 2. Estrazione Membri del Clan
             print(f"Recupero war per il clan: {CLAN_TAG}...")
             clan_war = await client.get_current_war(CLAN_TAG)
-            
-            # 3. Recupero parallelo dei dati (Sostituisce ThreadPoolExecutor)
-            print(f"E'una CWL: {clan_war.is_cwl} ")
-            print(f"stato war: {clan_war.state} ")
+            if(clan_war is not None ):
+                if(clan_war.is_cwl is False):                  
+                    # 3. Recupero parallelo dei dati (Sostituisce ThreadPoolExecutor)
+                    print(f"E'una CWL: {clan_war.is_cwl} ")
+                    print(f"stato war: {clan_war.state} ")
 
-            results=[]
-            partecipants=clan_war.members
-            for part in partecipants:
-                if part.name in [mem.name for mem in members]:
-                    list_star=[]
-                    if part.attacks:
-                        for atk in part.attacks:
-                            #print(atk.stars)
-                            list_star.append(atk.stars)
-                    if len(list_star)==0:
-                        #print(f"{part.name}:number of attacks:{len(part.attacks)} no attacks")
-                        results.append({"name":part.name, "war_skip":True,"atk_skip":2,"atk1":"SKIP","atk2":"SKIP"})
-                    
-                    elif len(list_star)==1:
-                        #print(f"{part.name}:number of attacks:{len(part.attacks)} atk1:{list_star[0]} ")
-                        results.append({"name":part.name, "war_skip":False,"atk_skip":1,"atk1":list_star[0],"atk2":"SKIP"})
-                    
-                    else:
-                        #print(f"{part.name}:number of attacks:{len(part.attacks)} atk1:{list_star[0]} atk2:{list_star[1]}")
-                        results.append({"name":part.name, "war_skip":False,"atk_skip":0,"atk1":list_star[0],"atk2":list_star[1]})
+                    results=[]
+                    partecipants=clan_war.members
+                    for part in partecipants:
+                        if part.name in [mem.name for mem in members]:
+                            list_star=[]
+                            if part.attacks:
+                                for atk in part.attacks:
+                                    #print(atk.stars)
+                                    list_star.append(atk.stars)
+                            if len(list_star)==0:
+                                #print(f"{part.name}:number of attacks:{len(part.attacks)} no attacks")
+                                results.append({"name":part.name, "war_skip":True,"atk_skip":2,"atk1":"SKIP","atk2":"SKIP"})
+                            
+                            elif len(list_star)==1:
+                                #print(f"{part.name}:number of attacks:{len(part.attacks)} atk1:{list_star[0]} ")
+                                results.append({"name":part.name, "war_skip":False,"atk_skip":1,"atk1":list_star[0],"atk2":"SKIP"})
+                            
+                            else:
+                                #print(f"{part.name}:number of attacks:{len(part.attacks)} atk1:{list_star[0]} atk2:{list_star[1]}")
+                                results.append({"name":part.name, "war_skip":False,"atk_skip":0,"atk1":list_star[0],"atk2":list_star[1]})
 
-            await aggiorna_membri(client,results,"rewards.xlsx","rewards.xlsx")
+                    await aggiorna_membri(client,results,"rewards.xlsx","rewards.xlsx")
            
 
                 

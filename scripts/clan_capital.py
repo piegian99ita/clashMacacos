@@ -1,7 +1,7 @@
 import openpyxl
 from openpyxl.utils import get_column_letter
 from copy import copy
-from datetime import date
+from datetime import date,datetime
 import asyncio
 import os
 import coc
@@ -46,64 +46,66 @@ async def main():
         return
 
     async with coc.Client(key_names="GitHub_Actions_Key") as client:
-        try:
-            await client.login(COC_EMAIL, COC_PASSWORD)
-            
-            if not os.path.exists(FILE_EXCEL):
-                print(f"Errore: {FILE_EXCEL} non trovato nel repository.")
-                return
+        
+        await client.login(COC_EMAIL, COC_PASSWORD)
+        
+        if not os.path.exists(FILE_EXCEL):
+            print(f"Errore: {FILE_EXCEL} non trovato nel repository.")
+            return
 
-            wb = openpyxl.load_workbook(FILE_EXCEL)
-            clan = await client.get_clan(CLAN_TAG)
-            lista_nomi = [m.name for m in clan.members]
-            ws = aggiorna_struttura_membri(wb, lista_nomi)
+        wb = openpyxl.load_workbook(FILE_EXCEL)
+        clan = await client.get_clan(CLAN_TAG)
+        lista_nomi = [m.name for m in clan.members]
+        ws = aggiorna_struttura_membri(wb, lista_nomi)
 
-            raid_log = await client.get_raid_log(CLAN_TAG)
-            raid_attuale = next((r for r in raid_log if str(r.state).lower() == 'ongoing'), None)
+        raid_log = await client.get_raid_log(CLAN_TAG)
+        raid_attuale = next((r for r in raid_log if str(r.state).lower() == 'ongoing'), None)
+        if raid_attuale:
+            start_dt = raid_attuale.start_time.time
+            end_dt=raid_attuale.end_time.time
             if raid_attuale:
-                start_dt = raid_attuale.start_time.time
-                end_dt=raid_attuale.end_time.time
-                if raid_attuale:
-                    data_inizio_str = raid_attuale.start_time.date().strftime("%d/%m/%Y")
-                    colonna_target = None
-                    for col in range(4, ws.max_column + 1):
-                        if ws.cell(row=1, column=col).value.startswith("Colonna"):
+                data_inizio_str = raid_attuale.start_time.time.date().strftime("%d/%m/%Y")
+                colonna_target = None
+                for col in range(4, ws.max_column + 1):
+                    if ws.cell(row=1, column=col).value.startswith("Colonna"):
+                        colonna_target = col -1
+                        dt=datetime.strptime(ws.cell(row=1, column=col-1).value, "%d/%m/%Y").date()
+
+                        if date.today()>=start_dt.date()  and date.today()<=end_dt.date() and dt!=start_dt.date():
+                            ws.cell(row=1, column=col).value=data_inizio_str
                             colonna_target = col
-                            if date.today()>=start_dt.date()  and date.today()<=end_dt.date():
-                                ws.cell(row=1, column=col).value=data_inizio_str
-                            
-                            break
+                        
+                        break
                     
-                    if not colonna_target:
-                        colonna_target = 4
-                        while ws.cell(row=1, column=colonna_target).value is not None:
-                            colonna_target += 1
-                        ws.cell(row=1, column=colonna_target).value = data_inizio_str
+                
+                if not colonna_target:
+                    colonna_target = 4
+                    while ws.cell(row=1, column=colonna_target).value is not None:
+                        colonna_target += 1
+                    ws.cell(row=1, column=colonna_target).value = data_inizio_str
 
-                    membri_raid = {m.name: m.attack_count for m in raid_attuale.members}
-                    for i in range(2, ws.max_row + 1):
-                        nome = ws.cell(row=i, column=1).value
-                        ws.cell(row=i, column=colonna_target).value = membri_raid.get(nome, 0)
+                membri_raid = {m.name: m.attack_count for m in raid_attuale.members}
+                for i in range(2, ws.max_row + 1):
+                    nome = ws.cell(row=i, column=1).value
+                    
+                    ws.cell(row=i, column=colonna_target).value = membri_raid.get(nome, 0)
 
-                    ultima_col_lettera = get_column_letter(ws.max_column)
-                    for row in range(2, ws.max_row + 1):
-                        # Arrotondamento aggiunto come richiesto
-                        ws.cell(row=row, column=3).value = f"=ROUND(AVERAGE(D{row}:{ultima_col_lettera}{row}), 0)"
-                        if ws.cell(row=row,column=colonna_target).value is None:
-                            ws.cell(row=row,column=colonna_target).value=0
-            else:
-                print("NESSUN RAID IN CORSO")   
-                ultima_col_lettera = get_column_letter(ws.max_column) 
+                ultima_col_lettera = get_column_letter(ws.max_column)
                 for row in range(2, ws.max_row + 1):
                     # Arrotondamento aggiunto come richiesto
                     ws.cell(row=row, column=3).value = f"=ROUND(AVERAGE(D{row}:{ultima_col_lettera}{row}), 0)"
-                    
+                    if ws.cell(row=row,column=colonna_target).value is None:
+                        ws.cell(row=row,column=colonna_target).value=0
+        else:
+            print("NESSUN RAID IN CORSO")   
+            ultima_col_lettera = get_column_letter(ws.max_column) 
+            for row in range(2, ws.max_row + 1):
+                # Arrotondamento aggiunto come richiesto
+                ws.cell(row=row, column=3).value = f"=ROUND(AVERAGE(D{row}:{ultima_col_lettera}{row}), 0)"
+                
 
-            wb.save(FILE_EXCEL)
-            print("Excel aggiornato con successo.")
-
-        except Exception as e:
-            print(f"Errore: {e}")
+        wb.save(FILE_EXCEL)
+        print("Excel aggiornato con successo.")
 
 if __name__ == "__main__":
     asyncio.run(main())
