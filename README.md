@@ -7,6 +7,6 @@ This file includes the data of the CWL previous wars and the data of the random 
 CC_CG_EVENTS.XLSX:
 This file contains the activity informations about Clan Games, Clan Capital assaults and clan events that occurs occasionally.
 
-If you don't want to download the file locally you can alternatively see the files at the following links:
+If you don't want to download the file locally you can alternatively see the files at the following links: \n
 EVENTS: [(https://docs.google.com/spreadsheets/d/1g3iDMZGQ7jDcFjj-f4ZN6FJ8tJyLjK83VHgNPf-9b1o/edit?usp=sharing)]
 WAR/CWL: [(https://docs.google.com/spreadsheets/d/1nZ1sBTCVh21_mut1vLTNKCEuNAen0XYVIyR5VDVl95Q/edit?usp=sharing)]
