@@ -1,2 +1,5 @@
 coc.py
 ruamel.yaml
+gspread 
+oauth2client
+pandas

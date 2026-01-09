@@ -14,6 +14,7 @@ env/
 
 *LOCAL.py
 secret.json
+credentials.json
 
 prova2.xlsx
 rewards_temp.xlsx
@@ -22,6 +23,7 @@ rewards_temp.xlsx
 .DS_Store
 Thumbs.db
 TOK_CLASH.txt
+
 
 
 # --- GitHub Actions ---

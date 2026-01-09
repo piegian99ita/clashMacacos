@@ -1,2 +1,5 @@
 openpyxl
 coc.py
+gspread 
+oauth2client
+pandas
