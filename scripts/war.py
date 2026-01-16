@@ -4,6 +4,7 @@ import coc
 from copy import copy
 import openpyxl
 from openpyxl.utils import get_column_letter
+from fill_color import fill_cells
 
 # --- CONFIGURAZIONE ---
 COC_EMAIL = os.getenv("COC_EMAIL")
@@ -115,7 +116,7 @@ async def aggiorna_membri(client,res,nome_file_input,nome_file_output):
         ws1.cell(row=idx, column=5).value = f"=SUM(G{idx}:{last_col}{idx})"
         ws1.cell(row=idx, column=6).value = f"=ROUND(AVERAGE(G{idx}:{last_col}{idx}),1)"
 
-
+    ws1=fill_cells(ws1.max_column,ws1.max_row,ws1)
     wb.save(nome_file_output)
 
 

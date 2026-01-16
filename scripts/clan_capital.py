@@ -5,6 +5,7 @@ from datetime import date,datetime
 import asyncio
 import os
 import coc
+from fill_color import fill_cells
 
 # --- CONFIGURAZIONE ---
 # Leggiamo i dati dai Secrets di GitHub
@@ -103,7 +104,7 @@ async def main():
                 # Arrotondamento aggiunto come richiesto
                 ws.cell(row=row, column=3).value = f"=ROUND(AVERAGE(D{row}:{ultima_col_lettera}{row}), 0)"
                 
-
+        ws=fill_cells(ws.max_column,ws.max_row,ws)
         wb.save(FILE_EXCEL)
         print("Excel aggiornato con successo.")
 
