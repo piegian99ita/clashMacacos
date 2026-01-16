@@ -22,7 +22,7 @@ for sheet_name in excel_data.sheet_names:
     print(f"Elaborazione foglio: {sheet_name}...")
     
     # Leggi i dati dello sheet corrente
-    df = pd.read_excel(file_path, sheet_name=sheet_name)
+    df = pd.read_excel(file_path, sheet_name=sheet_name, engine='openpyxl')
     df = df.fillna('') # Sostituisce i valori NaN con stringhe vuote
     
     # Prepara i dati (Header + Righe)
