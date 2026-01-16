@@ -17,28 +17,37 @@ spreadsheet = client.open_by_key(spreadsheet_id)
 # 3. Leggi il file Excel con tutti i suoi fogli
 file_path = 'rewards.xlsx'  # Assicurati che il nome coincida con quello generato
 excel_data = pd.ExcelFile(file_path)
+# ... (parte iniziale identica)
 
 for sheet_name in excel_data.sheet_names:
     print(f"Elaborazione foglio: {sheet_name}...")
     
-    # Leggi i dati dello sheet corrente
+    # Leggi specificando il motore openpyxl
     df = pd.read_excel(file_path, sheet_name=sheet_name, engine='openpyxl')
-    df = df.fillna('') # Sostituisce i valori NaN con stringhe vuote
     
-    # Prepara i dati (Header + Righe)
-    data_to_upload = [df.columns.values.tolist()] + df.values.tolist()
+    # Sostituisce NaN con stringa vuota, ma mantiene i tipi numerici dove possibile
+    df = df.fillna('') 
+    
+    # Converte i dati in una lista di liste (formato richiesto da gspread)
+    # .astype(str) può essere utile se hai problemi di formattazione, 
+    # ma rimuovilo se vuoi che i numeri rimangano numeri su Google Sheets
+    header = df.columns.tolist()
+    values = df.values.tolist()
+    data_to_upload = [header] + values
     
     try:
-        # Prova ad aprire la tab esistente
         worksheet = spreadsheet.worksheet(sheet_name)
     except gspread.exceptions.WorksheetNotFound:
-        # Se non esiste, crea una nuova tab
         worksheet = spreadsheet.add_worksheet(title=sheet_name, rows="100", cols="20")
         print(f"Creata nuova tab: {sheet_name}")
 
-    # Pulisce la tab esistente e carica i nuovi dati
     worksheet.clear()
-    worksheet.update(data_to_upload)
+    
+    # Utilizzo di value_input_option='USER_ENTERED' 
+    # Fondamentale: permette a Google Sheets di interpretare formule e date
+    spreadsheet.values_update(
+        f"'{sheet_name}'!A1",
+        params={'valueInputOption': 'USER_ENTERED'},
+        body={'values': data_to_upload}
+    )
     print(f"Tab '{sheet_name}' aggiornata con successo!")
-
-print("Aggiornamento completo di tutti i fogli!")
