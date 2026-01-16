@@ -1,5 +1,5 @@
 import gspread
-import pandas as pd
+import openpyxl
 from oauth2client.service_account import ServiceAccountCredentials
 import json
 import os
@@ -10,31 +10,46 @@ scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/au
 creds = ServiceAccountCredentials.from_json_keyfile_dict(json_creds, scope)
 client = gspread.authorize(creds)
 
-# 2. Apri il foglio Google (Spreadsheet principale)
+# 2. Apri il foglio Google
 spreadsheet_id = os.environ['SPREADSHEET_ID_EVENTS']
 spreadsheet = client.open_by_key(spreadsheet_id)
 
-# 3. Leggi il file Excel con tutti i suoi fogli
-file_path = 'cc_cg_events.xlsx'  # Assicurati che il nome coincida con quello generato
-excel_data = pd.ExcelFile(file_path)
-# ... (parte iniziale identica)
+# 3. Impostazioni file Excel
+file_path = 'cc_cg_events.xlsx'
 
-for sheet_name in excel_data.sheet_names:
+print(f"Apertura file Excel: {file_path}")
+
+# Carichiamo il workbook con data_only=False. 
+# Questo è il TRUCCO: dice alla libreria di leggere la formula (es. =SUM(A1:A5)) 
+# invece del risultato (che sarebbe None o 0).
+wb = openpyxl.load_workbook(file_path, data_only=False)
+
+for sheet_name in wb.sheetnames:
     print(f"Elaborazione foglio: {sheet_name}...")
     
-    # Leggi specificando il motore openpyxl
-    df = pd.read_excel(file_path, sheet_name=sheet_name, engine='openpyxl')
+    ws = wb[sheet_name]
     
-    # Sostituisce NaN con stringa vuota, ma mantiene i tipi numerici dove possibile
-    df = df.fillna('') 
+    # Estraiamo i dati riga per riga trasformandoli in una lista di liste
+    data_to_upload = []
     
-    # Converte i dati in una lista di liste (formato richiesto da gspread)
-    # .astype(str) può essere utile se hai problemi di formattazione, 
-    # ma rimuovilo se vuoi che i numeri rimangano numeri su Google Sheets
-    header = df.columns.tolist()
-    values = df.values.tolist()
-    data_to_upload = [header] + values
-    
+    for row in ws.iter_rows():
+        row_data = []
+        for cell in row:
+            # cell.value qui restituisce la stringa della formula (es. "=A1+B1")
+            # oppure il valore grezzo se non c'è formula.
+            val = cell.value
+            
+            # Gestione dei valori nulli e conversione date/numeri complessi
+            if val is None:
+                val = ""
+            # Convertiamo tutto in stringa per sicurezza, tranne le formule
+            # Google Sheets interpreterà i numeri e le date automaticamente
+            # se la stringa non inizia con '='
+            
+            row_data.append(val)
+        data_to_upload.append(row_data)
+
+    # 4. Caricamento su Google Sheets
     try:
         worksheet = spreadsheet.worksheet(sheet_name)
     except gspread.exceptions.WorksheetNotFound:
@@ -43,11 +58,15 @@ for sheet_name in excel_data.sheet_names:
 
     worksheet.clear()
     
-    # Utilizzo di value_input_option='USER_ENTERED' 
-    # Fondamentale: permette a Google Sheets di interpretare formule e date
+    # USIAMO 'USER_ENTERED':
+    # Questo dice a Google: "Fai finta che un utente stia digitando questi dati".
+    # Se arriva "=SUM(A1:B1)", Google lo calcolerà.
     spreadsheet.values_update(
         f"'{sheet_name}'!A1",
         params={'valueInputOption': 'USER_ENTERED'},
         body={'values': data_to_upload}
     )
-    print(f"Tab '{sheet_name}' aggiornata con successo!")
+    
+    print(f"Tab '{sheet_name}' aggiornata e formule attivate!")
+
+print("Aggiornamento completo riuscito.")
