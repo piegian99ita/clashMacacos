@@ -3,7 +3,7 @@ name: Esegui YAML FILE WAR Update
 on:
   schedule:
     # 06:00 UTC = 07:00 Italiane (Ora solare)
-    - cron: '13 4 */2 * *'
+    - cron: '13 4 */1 * *'
   workflow_dispatch: # Ti permette di avviarlo manualmente per testare se funziona
 
 permissions:
