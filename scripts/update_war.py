@@ -1,8 +1,26 @@
 import gspread
-import pandas as pd
+import openpyxl
 from oauth2client.service_account import ServiceAccountCredentials
 import json
 import os
+
+# --- FUNZIONE HELPER PER DETERMINARE IL SEPARATORE ---
+def get_formula_separator(spreadsheet_locale):
+    """
+    Restituisce ';' se il locale usa il punto e virgola (Europa/Sud America),
+    altrimenti restituisce ',' (USA/UK/Standard).
+    """
+    # Lista parziale di locali che usano il punto e virgola
+    # Italia, Germania, Francia, Spagna, Brasile, Olanda, Russia, ecc.
+    semicolon_locales = ['it_', 'de_', 'fr_', 'es_', 'pt_', 'nl_', 'ru_', 'pl_']
+    
+    # Se il locale del foglio inizia con uno di questi prefissi
+    for prefix in semicolon_locales:
+        if spreadsheet_locale.startswith(prefix):
+            return ';'
+    
+    return ','
+# -----------------------------------------------------
 
 # 1. Configurazione Credenziali
 json_creds = json.loads(os.environ['GCP_SERVICE_ACCOUNT_KEY'])
@@ -10,31 +28,49 @@ scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/au
 creds = ServiceAccountCredentials.from_json_keyfile_dict(json_creds, scope)
 client = gspread.authorize(creds)
 
-# 2. Apri il foglio Google (Spreadsheet principale)
+# 2. Apri il foglio Google e LEGGI IL LOCALE
 spreadsheet_id = os.environ['SPREADSHEET_ID_WAR']
 spreadsheet = client.open_by_key(spreadsheet_id)
 
-# 3. Leggi il file Excel con tutti i suoi fogli
-file_path = 'rewards.xlsx'  # Assicurati che il nome coincida con quello generato
-excel_data = pd.ExcelFile(file_path)
-# ... (parte iniziale identica)
+# Otteniamo la lingua impostata nel foglio (es. 'it_IT' o 'en_US')
+current_locale = spreadsheet.locale
+print(f"Lingua rilevata nel Google Sheet: {current_locale}")
 
-for sheet_name in excel_data.sheet_names:
+# Determiniamo quale separatore usare
+target_separator = get_formula_separator(current_locale)
+print(f"Separatore formule selezionato: '{target_separator}'")
+
+# 3. Impostazioni file Excel
+file_path = 'rewards.xlsx'
+wb = openpyxl.load_workbook(file_path, data_only=False)
+
+for sheet_name in wb.sheetnames:
     print(f"Elaborazione foglio: {sheet_name}...")
     
-    # Leggi specificando il motore openpyxl
-    df = pd.read_excel(file_path, sheet_name=sheet_name, engine='openpyxl')
+    ws = wb[sheet_name]
+    data_to_upload = []
     
-    # Sostituisce NaN con stringa vuota, ma mantiene i tipi numerici dove possibile
-    df = df.fillna('') 
-    
-    # Converte i dati in una lista di liste (formato richiesto da gspread)
-    # .astype(str) può essere utile se hai problemi di formattazione, 
-    # ma rimuovilo se vuoi che i numeri rimangano numeri su Google Sheets
-    header = df.columns.tolist()
-    values = df.values.tolist()
-    data_to_upload = [header] + values
-    
+    for row in ws.iter_rows():
+        row_data = []
+        for cell in row:
+            val = cell.value
+            
+            # --- LOGICA DI CONVERSIONE INTELLIGENTE ---
+            if isinstance(val, str) and val.startswith('='):
+                # Le formule generate da Python/Excel sono solitamente in formato USA (con virgola)
+                # Se il target richiede ';', sostituiamo le virgole
+                if target_separator == ';':
+                     val = val.replace(',', ';')
+                # Se il target richiede ',' (USA), lasciamo così com'è 
+                # (assumendo che l'Excel generato sia già in formato US)
+            
+            if val is None:
+                val = ""
+            
+            row_data.append(val)
+        data_to_upload.append(row_data)
+
+    # 4. Caricamento su Google Sheets
     try:
         worksheet = spreadsheet.worksheet(sheet_name)
     except gspread.exceptions.WorksheetNotFound:
@@ -43,11 +79,12 @@ for sheet_name in excel_data.sheet_names:
 
     worksheet.clear()
     
-    # Utilizzo di value_input_option='USER_ENTERED' 
-    # Fondamentale: permette a Google Sheets di interpretare formule e date
     spreadsheet.values_update(
         f"'{sheet_name}'!A1",
         params={'valueInputOption': 'USER_ENTERED'},
         body={'values': data_to_upload}
     )
-    print(f"Tab '{sheet_name}' aggiornata con successo!")
+    
+    print(f"Tab '{sheet_name}' aggiornata.")
+
+print("Aggiornamento completo riuscito.")
