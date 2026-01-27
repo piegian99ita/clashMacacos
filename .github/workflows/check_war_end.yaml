@@ -18,7 +18,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.ACTION_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
+          persist-credentials: true
 
       - name: Configura Python
         uses: actions/setup-python@v4
