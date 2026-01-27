@@ -189,7 +189,7 @@ def modifica_excel(nome_file_input, nome_file_output,members):
     
 
     # --- SALVATAGGIO ---
-    ws1=fill_cells(ws1.max_column,ws1.max_row,ws1)
+    #ws1=fill_cells(ws1.max_column,ws1.max_row,ws1)
     print(f"Salvataggio file: {nome_file_output}...")
     wb.save(nome_file_output)
     
