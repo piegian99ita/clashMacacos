@@ -4,7 +4,7 @@ on:
   schedule:
     # 06:00 UTC = 07:00 Italiane (Ora solare)
     - cron: '13 4 */1 * *'
-  workflow_dispatch: # Ti permette di avviarlo manualmente per testare se funziona
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -18,8 +18,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          # Usa il PAT_TOKEN perché stai modificando un file Workflow
           token: ${{ secrets.PAT_TOKEN }}
-          persist-credentials: true
+          persist-credentials: false # Mettiamo false per forzare l'auth manuale dopo
 
       - name: Configura Python
         uses: actions/setup-python@v4
@@ -32,19 +33,31 @@ jobs:
           pip install -r ./req/requirements2.txt
 
       - name: Esegui script CHACK WAR DATE
-        # Se il file clan_games.py è in una sottocartella, aggiungi il percorso (es. scripts/clan_games.py)
         env:
-          # Qui colleghi il Secret di GitHub alla variabile d'ambiente del sistema
           COC_EMAIL: ${{ secrets.COC_EMAIL }}
           COC_PASSWORD: ${{ secrets.COC_PASSWORD }}
           CLAN_TAG: ${{ secrets.CLAN_TAG }}
         run: python ./scripts/check_war.py
 
       - name: Salva modifiche yaml
+        env:
+          # Passiamo il token come variabile ambiente per usarlo nel comando git
+          MY_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
           git add .github/workflows/*.yaml
-          # Il comando commit non fallisce se non ci sono modifiche grazie a || echo
-          git commit -m "Update war yaml file data - $(date +'%Y-%m-%d')" || echo "Nessuna modifica da salvare"
-          git push
+          
+          # Controllo se ci sono modifiche PRIMA di fare commit e push
+          if git diff --staged --quiet; then
+            echo "Nessuna modifica da salvare"
+          else
+            git commit -m "Update war yaml file data - $(date +'%Y-%m-%d')"
+            
+            # QUESTA È LA SOLUZIONE AL 403:
+            # Impostiamo l'URL remoto includendo il token esplicitamente
+            git remote set-url origin https://x-access-token:${MY_TOKEN}@github.com/${{ github.repository }}.git
+            
+            git push origin HEAD:main
+          fi
