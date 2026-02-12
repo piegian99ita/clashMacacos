@@ -3,7 +3,7 @@ name: Esegui WAR Update
 on:
   schedule:
     # 06:00 UTC = 07:00 Italiane (Ora solare)
-    - cron: '35 11 1 * *'
+    - cron: '55 9 13 * *'
   workflow_dispatch: # Ti permette di avviarlo manualmente per testare se funziona
 
 permissions:
