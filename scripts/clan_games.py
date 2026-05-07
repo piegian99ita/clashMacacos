@@ -68,6 +68,7 @@ def modifica_excel(nome_file_input, nome_file_output,members):
             # Copiamo lo stile
             copia_stile(source_cell, target_cell)
         i += 1
+
     y=ws1.max_column+1
     
     lett=get_column_letter(y) 
@@ -81,104 +82,43 @@ def modifica_excel(nome_file_input, nome_file_output,members):
                 if(mem["name"]==name_to_search):
                     ws1.cell(row=row,column=5).value=mem["points"]
         old_points.append({"name":ws1.cell(row=row,column=1).value,"points": ws1.cell(row=row,column=5).value,"index": row })
+    
     today=date.today()
     old_points.sort(key=lambda x: x["name"])
     members.sort(key=lambda y: y["name"])
-
+    inside=False
     last_col=6
     if(6<=ws1.max_column):
         for i in range(6,ws1.max_column + 1,1):
-            current=ws1.cell(row=2,column=i).value
-            next_cell=ws1.cell(row=2,column=(i+1)).value
-            if(isinstance(current,int) and next_cell is None):
-                last_col=i+1
+            str_date=ws1.cell(row=1,column=i).value
+            start_CG=datetime.strptime(str_date, "%d/%m/%Y").date()
+            end_CG= start_CG + timedelta(days=6)
+            if(today>=start_CG):
+                last_col=i
+                if(today<=end_CG):
+                    inside=True
                 break
-            elif(current is None and i==ws1.max_column):
-                print("documento vuoto")
-    nextCG_start1=ws1.cell(row=1,column=last_col).value
-    lastCG_start1=ws1.cell(row=1,column=last_col-1).value
-    
-    lastCG_start = datetime.strptime(lastCG_start1, "%d/%m/%Y").date()
-    lastCG_end=lastCG_start + timedelta(days=6)
-    nextCG_start = datetime.strptime(nextCG_start1, "%d/%m/%Y").date()
-    nextCG_end= nextCG_start + timedelta(days=6)
-    
-   
 
-
-    
-    if (today<nextCG_start):
+    if inside:
+        print("dentro i giochi del clan")
         for i in range(0,ws1.max_row-1):
-            if(old_points[i]["name"]!=members[i]["name"]):
-                print("ERRORE NELL'ASSEGNAZIONE DEI PUNTI!")
-            else:
-                point_var=ws1.cell(row=old_points[i]["index"],column=last_col-1).value
-                test_data=ws1.cell(row=old_points[i]["index"],column=2).value
-                ach=ws1.cell(row=old_points[i]["index"],column=5).value
-                
-                
-                if point_var is None and datetime.strptime((test_data), "%d/%m/%Y").date()<= lastCG_end :
-                    ws1.cell(row=old_points[i]["index"],column=last_col-1).value=0
-                    ws1.cell(row=old_points[i]["index"],column=5).value=members[i]["points"]
-                elif(point_var is not None):
-                    ws1.cell(row=old_points[i]["index"],column=last_col-1).value+=(members[i]["points"]-ach)
-                    if (ws1.cell(row=old_points[i]["index"],column=last_col-1).value or 0 )>10000:
-                        ws1.cell(row=old_points[i]["index"],column=last_col-1).value=10000
-                    #if members[i]["points"]-ach!=0:
-                        #print(f"{members[i]['name']}:{members[i]['points']-ach}")
-                    ws1.cell(row=old_points[i]["index"],column=5).value=members[i]["points"]
-                    
-    else:
-        if today>nextCG_end:
-            for i in range(0,ws1.max_row-1):
                 if(old_points[i]["name"]!=members[i]["name"]):
                     print("ERRORE NELL'ASSEGNAZIONE DEI PUNTI!")    
                 else:
                     point_var=ws1.cell(row=old_points[i]["index"],column=last_col).value
                     ach=ws1.cell(row=old_points[i]["index"],column=5).value
-                    if(point_var is None and datetime.strptime((ws1.cell(row=old_points[i]["index"],column=2).value), "%d/%m/%Y").date()<= nextCG_end ):
+                    d_entry=ws1.cell(row=old_points[i]["index"],column=2).value
+                    if point_var is None:
                         ws1.cell(row=old_points[i]["index"],column=last_col).value=0+(members[i]["points"]-ach)  
+                        ws1.cell(row=old_points[i]["index"],column=5).value=members[i]["points"]
                         if (ws1.cell(row=old_points[i]["index"],column=last_col).value or 0 )>10000:
                             ws1.cell(row=old_points[i]["index"],column=last_col).value=10000
-                        #if members[i]["points"]-ach!=0:
-                            #print(f"{members[i]['name']}:{members[i]['points']-ach}")
-                        ws1.cell(row=old_points[i]["index"],column=5).value=members[i]["points"]
-        else:
-            if today.day>=22 and today.day<29:
-                for i in range(0,ws1.max_row-1):
-                    if(old_points[i]["name"]!=members[i]["name"]):
-                        print("ERRORE NELL'ASSEGNAZIONE DEI PUNTI!")    
                     else:
-                        point_var=ws1.cell(row=old_points[i]["index"],column=last_col).value
-                        ach=ws1.cell(row=old_points[i]["index"],column=5).value
-                        if(point_var is None and datetime.strptime((ws1.cell(row=old_points[i]["index"],column=2).value), "%d/%m/%Y").date()<= nextCG_end ):
-                            ws1.cell(row=old_points[i]["index"],column=last_col).value=0+(members[i]["points"]-ach) 
-                            if (ws1.cell(row=old_points[i]["index"],column=last_col).value or 0 )>10000:
-                                ws1.cell(row=old_points[i]["index"],column=last_col).value=10000
-                            #if members[i]["points"]-ach!=0:
-                                #print(f"{members[i]['name']}:{members[i]['points']-ach}")
-                            ws1.cell(row=old_points[i]["index"],column=5).value=members[i]["points"]
-            else:
-                for i in range(0,ws1.max_row-1):
-                    if(old_points[i]["name"]!=members[i]["name"]):
-                        print("ERRORE NELL'ASSEGNAZIONE DEI PUNTI!")    
-                    else:
-                        point_var=ws1.cell(row=old_points[i]["index"],column=last_col-1).value
-                        ach=ws1.cell(row=old_points[i]["index"],column=5).value
-                        if(point_var is None and datetime.strptime((ws1.cell(row=old_points[i]["index"],column=2).value), "%d/%m/%Y").date()<= lastCG_end ):
-                            ws1.cell(row=old_points[i]["index"],column=last_col-1).value=0+(members[i]["points"]-ach) 
-                            if (ws1.cell(row=old_points[i]["index"],column=last_col-1).value or 0 )>10000:
-                                ws1.cell(row=old_points[i]["index"],column=last_col-1).value=10000
-                            #if members[i]["points"]-ach!=0:
-                                #print(f"{members[i]['name']}:{members[i]['points']-ach}")
-                            ws1.cell(row=old_points[i]["index"],column=5).value=members[i]["points"]
-                        elif( datetime.strptime((ws1.cell(row=old_points[i]["index"],column=2).value), "%d/%m/%Y").date()<= lastCG_end):
-                            ws1.cell(row=old_points[i]["index"],column=last_col-1).value=(ws1.cell(row=old_points[i]["index"],column=last_col-1).value or 0) + (members[i]["points"]-ach)
-                            if (ws1.cell(row=old_points[i]["index"],column=last_col-1).value or 0 )>10000:
-                                ws1.cell(row=old_points[i]["index"],column=last_col-1).value=10000
-                           # if members[i]["points"]-ach!=0:
-                                #print(f"{members[i]['name']}:{members[i]['points']-ach}")
-                            ws1.cell(row=old_points[i]["index"],column=5).value=members[i]["points"]
+                        ws1.cell(row=old_points[i]["index"],column=last_col).value+=(members[i]["points"]-ach)  
+                        ws1.cell(row=old_points[i]["index"],column=5).value=members[i]["points"]                  
+
+    else:
+        print("SONO FUORI DAI GIOCHI DEL CLAN NON DEVO MODIFICARE NIENTE")                     
     
     print(f"Aggiornati punti per {len(members)} membri nella colonna {last_col}")                
                 
