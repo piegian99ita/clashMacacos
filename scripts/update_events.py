@@ -64,7 +64,17 @@ for sheet_name in wb.sheetnames:
                 # Se il target richiede ',' (USA), lasciamo così com'è 
                 # (assumendo che l'Excel generato sia già in formato US)
             
-            if val is None:
+            # 2. Gestione Date e tutto il resto
+            elif val is not None:
+                # Se è una data, la formattiamo come stringa leggibile
+                if hasattr(val, 'strftime'):
+                    val = val.strftime("%d/%m/%Y")
+                else:
+                    # Per tutto il resto (numeri, ecc.), forziamo la conversione in stringa
+                    val = str(val)
+            
+            # 3. Gestione celle vuote
+            else:
                 val = ""
             
             row_data.append(val)
