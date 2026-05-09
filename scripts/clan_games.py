@@ -97,7 +97,7 @@ def modifica_excel(nome_file_input, nome_file_output,members):
             if(today>=start_CG and today<=end_CG):
                 inside=True
                 break        
-            elif(today>end_CG):
+            elif(today<start_CG):
                 inside=False
                 last_col=i-1
                 break
