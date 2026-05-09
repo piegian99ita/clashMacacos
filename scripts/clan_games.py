@@ -93,10 +93,13 @@ def modifica_excel(nome_file_input, nome_file_output,members):
             str_date=ws1.cell(row=1,column=i).value
             start_CG=datetime.strptime(str_date, "%d/%m/%Y").date()
             end_CG= start_CG + timedelta(days=6)
-            if(today>=start_CG):
-                last_col=i
-                if(today<=end_CG):
-                    inside=True
+            last_col=i
+            if(today>=start_CG and today<=end_CG):
+                inside=True
+                break        
+            elif(today>end_CG):
+                inside=False
+                last_col=i-1
                 break
 
     if inside:
